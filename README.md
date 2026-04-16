@@ -27,7 +27,40 @@ Use Notion AI with your local files, shell, and fallback local agents.
 - Optional: `codex` CLI
 - Optional: `claude` CLI
 
-## Install
+## Quick Start
+
+For a fresh clone, the shortest path is:
+
+```bash
+git clone https://github.com/<your-account>/notion-local-ops-mcp.git
+cd notion-local-ops-mcp
+
+cp .env.example .env
+```
+
+Edit `.env` and set at least:
+
+```bash
+NOTION_LOCAL_OPS_WORKSPACE_ROOT="/absolute/path/to/workspace"
+NOTION_LOCAL_OPS_AUTH_TOKEN="replace-me"
+```
+
+Then run:
+
+```bash
+./scripts/dev-tunnel.sh
+```
+
+What you should expect:
+
+- the script creates or reuses `.venv`
+- the script installs missing Python dependencies automatically
+- the script starts the local MCP server on `http://127.0.0.1:8766/mcp`
+- the script starts a `cloudflared` quick tunnel and prints a public HTTPS URL
+
+Use the printed tunnel URL with `/mcp` appended in Notion, and use `NOTION_LOCAL_OPS_AUTH_TOKEN` as the Bearer token.
+
+## Manual Install
 
 ```bash
 git clone https://github.com/<your-account>/notion-local-ops-mcp.git
@@ -41,7 +74,7 @@ pip install -e .
 
 ## Configure
 
-Copy `.env.example` to `.env` and set at least:
+If you are not using the one-command flow, copy `.env.example` to `.env` and set at least:
 
 ```bash
 cp .env.example .env
@@ -58,7 +91,7 @@ NOTION_LOCAL_OPS_COMMAND_TIMEOUT="30"
 NOTION_LOCAL_OPS_DELEGATE_TIMEOUT="1800"
 ```
 
-## Start
+## Manual Start
 
 ```bash
 source .venv/bin/activate
@@ -92,6 +125,7 @@ Notes:
 - `.env` is gitignored, so your local token and workspace path stay out of git
 - if `NOTION_LOCAL_OPS_WORKSPACE_ROOT` is unset, the script defaults it to the repo root
 - if `NOTION_LOCAL_OPS_AUTH_TOKEN` is unset, the script exits with an error instead of guessing
+- for a fresh clone, you do not need to run `pip install` manually before using this script
 
 ## Expose With cloudflared
 
