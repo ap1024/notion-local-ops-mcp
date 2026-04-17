@@ -2,74 +2,37 @@
 
 [English](./README.md)
 
-一个本地 MCP 服务器，让 **MCP Agent** 可以直接操作你的本地文件、shell、git，以及委托给本地 coding agent 的任务。
+本地 MCP 服务器，用来操作本地文件、shell、git，以及委托本地 coding task。
 
-## 核心项目 vs 可选 Notion 示范
+## 可选 Notion 工作流示范
 
-`notion-local-ops-mcp` 的核心就是这个 MCP 服务器本身。
+仓库本体就是 MCP 服务器。
 
-**指令页 + Notion AI + 项目管理** 只是构建在它之上的一个**可选示范 / 扩展示例**。这个示范场景适合你想把下面几层组合起来时使用：
+Notion 部分只是构建在它之上的一个可选示范：
 
-- **Notion AI**：负责页面级指令
-- **MCP Agent**：负责真实的本地执行
-- **Projects / Tasks**：负责在 Notion 内做协调
+- **Notion AI**：读取页面级指令页
+- **MCP Agent**：通过这个 MCP 服务器执行本地工作
+- **Projects / Tasks**：Notion 内的可选协调层
 
-不用这套示范场景，也完全可以使用本项目。
+![Notion 指令页示例](./assets/notion/notion-coordination-hub.png)
 
-## 可选的公开 Notion 指令页示例
+公开示例页：
 
-如果你想用这套可选工作流，统一使用这个公开页面：
+- [Notion 指令页示例](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
 
-📖 **[公开 Notion 指令页示例](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)**
-
-请注意：
-
-- 这一个公开页面同时也是你 duplicate 到自己 workspace 里的来源页
-- 在示范工作流里，它真正的工作角色是 **Notion AI 的页面级指令页**
-- 页面里目前带有本仓库的示例行数据，方便你一眼看懂结构
-- duplicate 之后，应该尽快替换或删除示例行，并改成你自己的路径
+只有在你要使用这套可选 Notion 工作流时，才需要这张页面。duplicate 到自己的 workspace 后，再到 `Notion AI > 指令` 里绑定。
 
 ## 文档
 
 ### English
 
-- [5-minute setup guide](./docs/notion-setup.md)
-- [Optional workflow showcase](./docs/notion-showcase.md)
-- [Public Notion instruction-page demo](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
+- [Notion setup guide](./docs/notion-setup.md)
+- [Notion workflow showcase](./docs/notion-showcase.md)
 
 ### 中文
 
-- [5 分钟配置指南](./docs/notion-setup.zh-CN.md)
-- [可选工作流效果展示](./docs/notion-showcase.zh-CN.md)
-- [公开 Notion 指令页示例](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
-
-## 术语约定
-
-为了避免混淆，本文档统一使用以下命名：
-
-1. **Notion AI**
-   指 Notion 里的页面级 AI 行为层。在可选示范里，你会把 duplicate 出来的公开页绑定到 `Notion AI > 指令`。
-2. **MCP Agent**
-   指真正通过 `notion-local-ops-mcp` 使用本地文件、shell、git、delegate 能力的 agent。
-3. **指令页**
-   指可选示范里 duplicate 后给 Notion AI 使用的那张页面。
-4. **Projects / Tasks**
-   指只在这个可选示范里使用的运行时协调页面。
-
-## 可选示范的四层结构
-
-如果你使用可选的 Notion 工作流，需要把下面四层分开理解：
-
-1. **Notion AI 的页面级指令页**
-   负责定义 `Task -> Project -> AGENTS.md` 的读取顺序、工作目录推导方式，以及回写规则。
-2. **MCP Agent 的 prompt**
-   负责定义通用 coding-agent 行为，例如本地文件歧义处理、工具优先级、验证风格和执行习惯。
-3. **MCP 服务器**
-   也就是 `notion-local-ops-mcp` 本身，提供本地文件、shell、git 和委托执行能力。
-4. **Projects / Tasks 运行时数据**
-   保存 task 状态、project 默认值、验证摘要和其他协调字段。
-
-请把这四层分开。**指令页不是 MCP Agent 的 prompt**，而这套可选 Notion 工作流也**不是**本仓库的核心本体。
+- [Notion 配置指南](./docs/notion-setup.zh-CN.md)
+- [Notion 工作流展示](./docs/notion-showcase.zh-CN.md)
 
 ## 提供的能力
 
@@ -233,12 +196,7 @@ cloudflared tunnel --config ./cloudflared-example.yml run <your-tunnel-name>
 
 ## 在 Notion 中配置你的 MCP Agent
 
-如果你想看更面向使用者的配置流程，而不是原始技术步骤，可以直接看：
-
-- [Notion 配置指南](./docs/notion-setup.zh-CN.md)
-- [可选工作流效果展示](./docs/notion-showcase.zh-CN.md)
-
-配置时使用：
+使用：
 
 - URL：`https://<your-domain-or-tunnel>/mcp`
 - Auth type：`Bearer`

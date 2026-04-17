@@ -2,74 +2,37 @@
 
 [中文说明](./README.zh-CN.md)
 
-A local MCP server that lets an **MCP Agent** operate on your local files, shell, git, and delegated local coding agents.
+Local MCP server for local files, shell, git, and delegated coding tasks.
 
-## Core Project vs Optional Notion Demo
+## Optional Notion Workflow Demo
 
-`notion-local-ops-mcp` itself is the MCP server.
+The repo itself is the MCP server.
 
-The **Notion AI + instruction page + project-management workflow** is only an **optional demo / extension scenario** built on top of this server. It is useful if you want to combine:
+The Notion workflow is only an optional demo built on top of it:
 
-- **Notion AI** for page-level instructions
-- an **MCP Agent** for actual local execution
-- **Projects / Tasks** pages for coordination inside Notion
+- **Notion AI**: reads a page-level instruction page
+- **MCP Agent**: executes local work through this MCP server
+- **Projects / Tasks**: optional coordination layer in Notion
 
-That demo is not required to use this project.
+![Notion instruction page demo](./assets/notion/notion-coordination-hub.png)
 
-## Optional Public Notion Instruction-Page Demo
+Public demo page:
 
-If you want that optional workflow, this is the canonical public page:
+- [Notion instruction-page demo](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
 
-📖 **[Public Notion instruction-page demo](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)**
+Use that page only if you want the optional Notion workflow. After duplicating it into your own workspace, bind it in `Notion AI > Instructions`.
 
-Important:
-
-- this same public page is what you duplicate into your own workspace
-- in the demo workflow, its real working role is to become the **page-level instruction page for Notion AI**
-- the page currently includes sample rows from this repo so the structure is visible immediately
-- after duplicating it, replace or delete the sample rows and set your own paths
-
-## Documentation
+## Docs
 
 ### English
 
-- [5-minute setup guide](./docs/notion-setup.md)
-- [Optional workflow showcase](./docs/notion-showcase.md)
-- [Public Notion instruction-page demo](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
+- [Notion setup guide](./docs/notion-setup.md)
+- [Notion workflow showcase](./docs/notion-showcase.md)
 
 ### 中文
 
-- [5 分钟配置指南](./docs/notion-setup.zh-CN.md)
-- [可选工作流效果展示](./docs/notion-showcase.zh-CN.md)
-- [公开 Notion 指令页示例](https://ncp.notion.site/Agent-Start-Here-Template-10eb4da3979d8396861281ca608bc34e)
-
-## Terminology
-
-To avoid confusion, this repo uses these terms consistently:
-
-1. **Notion AI**
-   The page-level AI behavior inside Notion. In the optional demo, you bind the duplicated public page in `Notion AI > Instructions`.
-2. **MCP Agent**
-   The agent that actually uses `notion-local-ops-mcp` to read local files, run shell commands, inspect git state, and delegate local coding work.
-3. **Instruction page**
-   The duplicated public Notion page used by Notion AI in the optional demo workflow.
-4. **Projects / Tasks**
-   The runtime coordination pages used only in that optional demo workflow.
-
-## How The Optional Demo Fits Together
-
-If you use the optional Notion workflow, there are four separate layers:
-
-1. **Page-level instruction page for Notion AI**
-   Defines routing and coordination rules such as `Task -> Project -> AGENTS.md`, working-directory derivation, and write-back rules.
-2. **Prompt for the MCP Agent**
-   Defines general coding-agent behavior: local-file disambiguation, tool preference, verification style, and execution behavior.
-3. **MCP server**
-   `notion-local-ops-mcp` provides the actual execution layer: local files, shell, git, and delegated tasks.
-4. **Projects / Tasks runtime data**
-   Stores task status, project defaults, verification summaries, and other coordination fields.
-
-Keep these layers separate. The instruction page is **not** the same thing as the MCP Agent prompt, and the optional Notion workflow is **not** the core of this repository.
+- [Notion 配置指南](./docs/notion-setup.zh-CN.md)
+- [Notion 工作流展示](./docs/notion-showcase.zh-CN.md)
 
 ## What It Provides
 
@@ -232,11 +195,6 @@ cloudflared tunnel --config ./cloudflared-example.yml run <your-tunnel-name>
 ```
 
 ## Add To Your MCP Agent In Notion
-
-If you want the shortest user-facing walkthrough instead of raw setup notes, see:
-
-- [Notion setup guide](./docs/notion-setup.md)
-- [Optional workflow showcase](./docs/notion-showcase.md)
 
 Use:
 
