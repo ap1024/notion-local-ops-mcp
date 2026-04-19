@@ -9,7 +9,7 @@ from pathlib import Path
 import anyio
 import uvicorn
 from mcp.client.session import ClientSession
-from mcp.client.sse import sse_client
+from mcp.client.streamable_http import streamable_http_client
 
 
 def _find_free_port() -> int:
@@ -56,7 +56,7 @@ def _running_server(tmp_path: Path, monkeypatch):
 
 
 async def _connect_and_initialize(url: str) -> list[str]:
-    async with sse_client(url) as (read_stream, write_stream):
+    async with streamable_http_client(url) as (read_stream, write_stream, _):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
             tools = await session.list_tools()
@@ -103,10 +103,10 @@ def test_two_clients_share_one_mutable_workspace_state(tmp_path: Path, monkeypat
 
     with _running_server(tmp_path, monkeypatch) as url:
         async def scenario() -> tuple[dict[str, object], dict[str, object], dict[str, object], dict[str, object]]:
-            async with sse_client(url) as first_streams:
-                async with ClientSession(*first_streams) as first_session:
-                    async with sse_client(url) as second_streams:
-                        async with ClientSession(*second_streams) as second_session:
+            async with streamable_http_client(url) as first_streams:
+                async with ClientSession(*first_streams[:2]) as first_session:
+                    async with streamable_http_client(url) as second_streams:
+                        async with ClientSession(*second_streams[:2]) as second_session:
                             await first_session.initialize()
                             await second_session.initialize()
 

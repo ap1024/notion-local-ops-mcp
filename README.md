@@ -331,10 +331,20 @@ python -m compileall src tests
 - Check the token matches `NOTION_LOCAL_OPS_AUTH_TOKEN`
 - Check `cloudflared` is still running
 
-### SSE path works locally but not over tunnel
+### MCP endpoint works locally but not over tunnel
 
 - Retry with a named tunnel instead of a quick tunnel
-- Confirm `GET /mcp` returns `text/event-stream`
+- Confirm a real MCP client can list tools from `/mcp`, for example:
+
+```bash
+source .venv/bin/activate
+fastmcp list http://127.0.0.1:8766/mcp
+```
+
+### Logs show repeated 404s
+
+- If the 404 is for `GET /`, the configured URL likely missed the `/mcp` suffix
+- If the 404/405 happens while using `/mcp`, upgrade to a build that serves streamable HTTP on `/mcp`
 
 ### `delegate_task` fails
 

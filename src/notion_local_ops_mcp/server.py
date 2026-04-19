@@ -362,7 +362,7 @@ def cancel_task(task_id: str) -> dict[str, object]:
 def build_http_app():
     return mcp.http_app(
         path="/mcp",
-        transport="sse",
+        transport="streamable-http",
     )
 
 
@@ -371,8 +371,8 @@ def main() -> None:
     print(f"Starting {APP_NAME} on {HOST}:{PORT}")
     print(f"workspace_root={WORKSPACE_ROOT}")
     print(f"state_dir={STATE_DIR}")
-    print("sse_path=/mcp")
-    print("message_path=/messages/")
+    print("transport=streamable-http")
+    print("mcp_path=/mcp")
     app = build_http_app()
     uvicorn.run(app, host=HOST, port=PORT)
 

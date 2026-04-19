@@ -331,10 +331,20 @@ python -m compileall src tests
 - 确认 token 与 `NOTION_LOCAL_OPS_AUTH_TOKEN` 一致
 - 确认 `cloudflared` 仍在运行
 
-### 本地 SSE 正常，但通过 tunnel 不通
+### 本地 `/mcp` 正常，但通过 tunnel 不通
 
 - 优先改用 named tunnel 再试
-- 确认 `GET /mcp` 返回 `text/event-stream`
+- 用真实 MCP client 验证 `/mcp`，例如：
+
+```bash
+source .venv/bin/activate
+fastmcp list http://127.0.0.1:8766/mcp
+```
+
+### 日志里反复出现 404
+
+- 如果 404 是 `GET /`，通常是配置 URL 时漏掉了结尾的 `/mcp`
+- 如果已经是 `/mcp` 仍出现 404/405，请升级到把 `/mcp` 改为 streamable HTTP 的版本
 
 ### `delegate_task` 失败
 
