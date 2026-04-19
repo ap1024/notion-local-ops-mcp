@@ -29,9 +29,11 @@ from .files import read_file as read_file_impl
 from .files import read_files as read_files_impl
 from .files import replace_in_file as replace_in_file_impl
 from .files import write_file as write_file_impl
+from .gitops import git_blame as git_blame_impl
 from .gitops import git_commit as git_commit_impl
 from .gitops import git_diff as git_diff_impl
 from .gitops import git_log as git_log_impl
+from .gitops import git_show as git_show_impl
 from .gitops import git_status as git_status_impl
 from .patching import apply_patch as apply_patch_impl
 from .pathing import resolve_cwd, resolve_path
@@ -270,30 +272,58 @@ def git_status(cwd: str | None = None) -> dict[str, object]:
 
 @mcp.tool(
     name="git_diff",
-    description="Return git diff output and changed file paths for the repository at cwd.",
+    description=(
+        "Return git diff output plus per-file diffs with added/removed counts. "
+        "Each file is truncated independently to per_file_max_bytes so a single huge "
+        "file does not hide changes in other files."
+    ),
 )
 def git_diff(
     cwd: str | None = None,
     staged: bool = False,
     paths: list[str] | None = None,
     max_bytes: int = 65536,
+    per_file_max_bytes: int = 16384,
 ) -> dict[str, object]:
     resolved_cwd = resolve_cwd(cwd, WORKSPACE_ROOT)
-    return git_diff_impl(cwd=resolved_cwd, staged=staged, paths=paths, max_bytes=max_bytes)
+    return git_diff_impl(
+        cwd=resolved_cwd,
+        staged=staged,
+        paths=paths,
+        max_bytes=max_bytes,
+        per_file_max_bytes=per_file_max_bytes,
+    )
 
 
 @mcp.tool(
     name="git_commit",
-    description="Create a git commit for staged changes, selected paths, or all current changes.",
+    description=(
+        "Create a git commit for staged changes, selected paths, or all current changes. "
+        "Supports amend (rewrite HEAD), allow_empty (commit without changes), custom author, "
+        "and sign_off (append Signed-off-by trailer)."
+    ),
 )
 def git_commit(
     message: str,
     cwd: str | None = None,
     paths: list[str] | None = None,
     stage_all: bool = False,
+    amend: bool = False,
+    allow_empty: bool = False,
+    author: str | None = None,
+    sign_off: bool = False,
 ) -> dict[str, object]:
     resolved_cwd = resolve_cwd(cwd, WORKSPACE_ROOT)
-    return git_commit_impl(cwd=resolved_cwd, message=message, paths=paths, stage_all=stage_all)
+    return git_commit_impl(
+        cwd=resolved_cwd,
+        message=message,
+        paths=paths,
+        stage_all=stage_all,
+        amend=amend,
+        allow_empty=allow_empty,
+        author=author,
+        sign_off=sign_off,
+    )
 
 
 @mcp.tool(
@@ -303,6 +333,52 @@ def git_commit(
 def git_log(cwd: str | None = None, limit: int = 10) -> dict[str, object]:
     resolved_cwd = resolve_cwd(cwd, WORKSPACE_ROOT)
     return git_log_impl(cwd=resolved_cwd, limit=limit)
+
+
+@mcp.tool(
+    name="git_show",
+    description=(
+        "Show metadata + per-file diff for a commit or any git ref (defaults to HEAD). "
+        "Useful for inspecting a specific commit without shelling out."
+    ),
+)
+def git_show(
+    ref: str = "HEAD",
+    cwd: str | None = None,
+    max_bytes: int = 65536,
+    per_file_max_bytes: int = 16384,
+) -> dict[str, object]:
+    resolved_cwd = resolve_cwd(cwd, WORKSPACE_ROOT)
+    return git_show_impl(
+        cwd=resolved_cwd,
+        ref=ref,
+        max_bytes=max_bytes,
+        per_file_max_bytes=per_file_max_bytes,
+    )
+
+
+@mcp.tool(
+    name="git_blame",
+    description=(
+        "Return per-line blame info (commit, author, summary, content) for a file. "
+        "Restrict to a line range via start_line / end_line."
+    ),
+)
+def git_blame(
+    path: str,
+    cwd: str | None = None,
+    ref: str | None = None,
+    start_line: int | None = None,
+    end_line: int | None = None,
+) -> dict[str, object]:
+    resolved_cwd = resolve_cwd(cwd, WORKSPACE_ROOT)
+    return git_blame_impl(
+        cwd=resolved_cwd,
+        path=path,
+        ref=ref,
+        start_line=start_line,
+        end_line=end_line,
+    )
 
 
 @mcp.tool(
