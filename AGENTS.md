@@ -36,11 +36,11 @@ src/notion_local_ops_mcp/
 | `server_info` | Inspect runtime config and available MCP tools |
 | `set_default_cwd` / `get_default_cwd` | Manage session default working directory |
 | `list_files` | List directory contents (flat or recursive) |
-| `search` | Canonical unified query tool (glob/regex/text) |
-| `read_text` | Canonical single/batch text reader with line pagination |
+| `search` | Canonical unified query tool (glob/regex/text); hides hidden and `.gitignore`d paths by default and supports regex/text against a single file |
+| `read_text` | Canonical single/batch text reader with line pagination and optional line numbers |
 | `write_file` | Create or overwrite a file (`dry_run` supported) |
 | `apply_patch` | Default edit tool for existing files; supports validation/dry-run |
-| `git_status` / `git_diff` / `git_commit` / `git_log` / `git_show` / `git_blame` | Structured git workflows |
+| `git_status` / `git_diff` / `git_commit` / `git_log` / `git_show` / `git_blame` | Structured git workflows (when cwd is actually inside a git repo) |
 | `run_command` | Execute a shell command (sync or background) |
 | `run_command_stream` | Start long shell command and poll via task id |
 | `delegate_task` | Submit long-running task to codex/claude-code with optional structured output parsing |
@@ -53,7 +53,7 @@ src/notion_local_ops_mcp/
 - **WORKSPACE_ROOT** — Relative-path anchor and default cwd only (not a sandbox boundary). Set via `NOTION_LOCAL_OPS_WORKSPACE_ROOT`; defaults to `$HOME`.
 - **Bearer auth** — Optional `NOTION_LOCAL_OPS_AUTH_TOKEN`; if set, every request must include a matching `Authorization: Bearer <token>` header.
 - **Delegate executors** — `delegate_task` spawns a background thread running either OpenAI Codex CLI or Claude Code CLI. The executor is chosen automatically (`auto`) or explicitly (`codex` / `claude-code`). Task state is persisted under `STATE_DIR/tasks/<id>/`.
-- **Safety** — `apply_patch`/`write_file` are the public write surface. `read_text` caps output at 200 lines / 32 KB. Binary files are rejected.
+- **Safety** — `apply_patch`/`write_file` are the public write surface. `read_text` caps output at 200 lines / 32 KB, supports optional numbered lines for evidence output, and binary files are rejected.
 
 ## Configuration (env vars)
 
