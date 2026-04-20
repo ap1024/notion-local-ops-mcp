@@ -52,7 +52,10 @@ registry = ExecutorRegistry(
 )
 
 MCP_INSTRUCTIONS = (
-    "Use direct tools first for normal tasks: list/glob/grep/read/replace/write/patch/git/run. "
+    "Use direct tools first for normal tasks. Prioritize apply_patch/write_file for edits and "
+    "run_command_stream/wait_task for long-running shell work. "
+    "Use search/read_text for focused repo discovery and reading, not as a substitute for every shell step. "
+    "Use git_* only when the current cwd is actually inside a git repository. "
     "Use delegate_task only when direct tools are insufficient for a complex, long-running, or multi-file task."
 )
 
@@ -122,7 +125,8 @@ def list_files(
     description=(
         "Canonical search tool that unifies glob, regex grep, and plain-text search. "
         "Use mode='glob' for path discovery, mode='regex' for code/text regex, and "
-        "mode='text' for literal substring search."
+        "mode='text' for literal substring search. Hidden entries and .gitignore'd "
+        "paths are excluded by default; regex/text search also accept a single file path."
     ),
 )
 def search(
@@ -138,6 +142,9 @@ def search(
     limit: int = 200,
     offset: int = 0,
     multiline: bool = False,
+    include_hidden: bool = False,
+    respect_gitignore: bool = True,
+    exclude_patterns: list[str] | None = None,
 ) -> dict[str, object]:
     target = resolve_path(path or ".", WORKSPACE_ROOT)
 
@@ -147,7 +154,15 @@ def search(
                 "success": False,
                 "error": {"code": "missing_pattern", "message": "mode=glob requires `pattern`."},
             }
-        result = glob_files_impl(target, pattern=pattern, limit=limit, offset=offset)
+        result = glob_files_impl(
+            target,
+            pattern=pattern,
+            limit=limit,
+            offset=offset,
+            include_hidden=include_hidden,
+            respect_gitignore=respect_gitignore,
+            exclude_patterns=exclude_patterns,
+        )
         if isinstance(result, dict):
             result["mode"] = mode
         return result
@@ -181,6 +196,9 @@ def search(
             head_limit=limit,
             offset=offset,
             multiline=multiline,
+            include_hidden=include_hidden,
+            respect_gitignore=respect_gitignore,
+            exclude_patterns=exclude_patterns,
         )
         if isinstance(result, dict):
             result["mode"] = mode
@@ -201,7 +219,8 @@ def search(
     name="read_text",
     description=(
         "Canonical text-reader tool. Pass either `path` for single-file reads or "
-        "`paths` for batch reads. Pagination is line-based via start_line/line_limit."
+        "`paths` for batch reads. Pagination is line-based via start_line/line_limit. "
+        "Set include_line_numbers=true when evidence or code-review output needs numbered lines."
     ),
 )
 def read_text(
@@ -209,6 +228,7 @@ def read_text(
     paths: list[str] | None = None,
     start_line: int | None = None,
     line_limit: int | None = None,
+    include_line_numbers: bool = False,
 ) -> dict[str, object]:
     has_path = bool(path)
     has_paths = bool(paths)
@@ -231,6 +251,7 @@ def read_text(
             limit=effective_limit,
             max_lines=200,
             max_bytes=32768,
+            include_line_numbers=include_line_numbers,
         )
         if isinstance(result, dict):
             result["mode"] = "single"
@@ -243,6 +264,7 @@ def read_text(
         limit=effective_limit,
         max_lines=200,
         max_bytes=32768,
+        include_line_numbers=include_line_numbers,
     )
     if isinstance(result, dict):
         result["mode"] = "batch"
