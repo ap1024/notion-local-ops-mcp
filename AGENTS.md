@@ -22,7 +22,7 @@ src/notion_local_ops_mcp/
 ├── server.py      # FastMCP app, tool registration, uvicorn entrypoint
 ├── config.py      # All env-var driven settings (host, port, paths, timeouts…)
 ├── pathing.py     # Path resolution: relative → absolute under WORKSPACE_ROOT
-├── files.py       # list_files, read_text, write_file, replace_in_file
+├── files.py       # list_files, read_text, write_file, internal replace helpers
 ├── search.py      # search implementations (glob/regex/text)
 ├── shell.py       # run_command — subprocess with timeout
 ├── tasks.py       # TaskStore — persistent task metadata & logs on disk
@@ -39,8 +39,7 @@ src/notion_local_ops_mcp/
 | `search` | Canonical unified query tool (glob/regex/text) |
 | `read_text` | Canonical single/batch text reader with line pagination |
 | `write_file` | Create or overwrite a file (`dry_run` supported) |
-| `replace_in_file` | Replace unique/all exact text fragments (`dry_run` supported) |
-| `apply_patch` | Apply codex-style patch with validation/dry-run support |
+| `apply_patch` | Default edit tool for existing files; supports validation/dry-run |
 | `git_status` / `git_diff` / `git_commit` / `git_log` / `git_show` / `git_blame` | Structured git workflows |
 | `run_command` | Execute a shell command (sync or background) |
 | `run_command_stream` | Start long shell command and poll via task id |
@@ -54,7 +53,7 @@ src/notion_local_ops_mcp/
 - **WORKSPACE_ROOT** — Relative-path anchor and default cwd only (not a sandbox boundary). Set via `NOTION_LOCAL_OPS_WORKSPACE_ROOT`; defaults to `$HOME`.
 - **Bearer auth** — Optional `NOTION_LOCAL_OPS_AUTH_TOKEN`; if set, every request must include a matching `Authorization: Bearer <token>` header.
 - **Delegate executors** — `delegate_task` spawns a background thread running either OpenAI Codex CLI or Claude Code CLI. The executor is chosen automatically (`auto`) or explicitly (`codex` / `claude-code`). Task state is persisted under `STATE_DIR/tasks/<id>/`.
-- **Safety** — `replace_in_file` enforces single-match uniqueness. `read_text` caps output at 200 lines / 32 KB. Binary files are rejected.
+- **Safety** — `apply_patch`/`write_file` are the public write surface. `read_text` caps output at 200 lines / 32 KB. Binary files are rejected.
 
 ## Configuration (env vars)
 

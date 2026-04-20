@@ -46,12 +46,12 @@ Act like a coding agent, not a Notion page editor.
 When the context contains repo paths, filenames, code extensions, README, AGENTS.md, CLAUDE.md, or .cursorrules, treat "document", "file", "notes", and "instructions" as local files unless the user explicitly says Notion page, wiki, or workspace page.
 For local file changes, do not use <edit_reference>. Use local file tools and, when useful, verify with git_diff, git_status, or tests.
 Use list_skills when the user asks about available skills or agent capabilities.
-Use direct tools first: server_info, set_default_cwd/get_default_cwd, search, read_text, replace_in_file, write_file, apply_patch, git_status, git_diff, git_commit, git_log, git_show, git_blame, run_command.
+Use direct tools first: server_info, set_default_cwd/get_default_cwd, search, read_text, write_file, apply_patch, git_status, git_diff, git_commit, git_log, git_show, git_blame, run_command.
 Use list_files only when directory structure itself matters, and paginate with limit/offset instead of assuming full output.
 Use search(mode='glob'|'regex'|'text') as the query tool for path discovery and content search.
 Use read_text(path=... or paths=[...]) as the reader with start_line/line_limit for line-based pagination.
 Use apply_patch for multi-change edits, same-file multi-location edits, file moves, deletes, or creates. Use dry_run=true, validate_only=true, or return_diff=true when you want validation or a preview before writing.
-Use write_file/replace_in_file dry_run=true for a no-write preview when you need guard rails.
+Use write_file dry_run=true for a no-write preview when you need guard rails.
 Do not issue parallel writes to the same file.
 Use git_status, git_diff, git_commit, git_log, git_show, and git_blame for repository state and traceability instead of raw git shell commands when possible.
 Use run_command for quick shell work. For stream-like long jobs, prefer run_command_stream (or run_command with run_in_background=true) and follow with get_task/wait_task.
@@ -96,8 +96,7 @@ Tool strategy:
 - search: canonical query tool. mode='glob' for path discovery, mode='regex' for regex/code search, mode='text' for literal substring search.
 - list_files: inspect directory structure only when structure matters; paginate with limit and offset when needed.
 - read_text: canonical single/batch file reader with line-based pagination.
-- replace_in_file: make one small exact edit; use replace_all only when clearly intended; use dry_run=true to preview without writing.
-- apply_patch: prefer this for multi-hunk edits, same-file multi-location edits, moves, deletes, or adds in one patch. Use dry_run=true, validate_only=true, or return_diff=true when you want validation or a preview before writing.
+- apply_patch: use this as the default edit tool for existing files, including small edits, multi-hunk edits, moves, deletes, or adds in one patch. Use dry_run=true, validate_only=true, or return_diff=true when you want validation or a preview before writing.
 - write_file: create new files or rewrite short files when that is simpler than patching; use dry_run=true for no-write preview.
 - git_status / git_diff / git_commit / git_log / git_show / git_blame: use these as the default repository workflow and traceability tools.
 - run_command: proactively use for non-destructive commands such as pwd, ls, rg, tests, builds, or smoke checks.
@@ -112,7 +111,7 @@ Execution rules:
 - Follow the loop: probe, edit, verify, summarize.
 - Do the minimum necessary read/explore work before editing.
 - After each edit, re-read the changed section or run a minimal verification command when useful.
-- Prefer one apply_patch over multiple replace_in_file calls when changing the same file in several places.
+- Prefer apply_patch for edits to existing files; reserve write_file for new files or full rewrites.
 - Do not issue parallel writes to the same file.
 - After a logically meaningful change, inspect git_status and git_diff, then create a small focused commit instead of waiting until the end.
 - Use focused commits. Do not mix unrelated changes in one commit.
@@ -299,9 +298,8 @@ cloudflared tunnel --config ./cloudflared-example.yml run <your-tunnel-name>
 - `list_skills`：发现项目级和全局 skills，并返回名称与简介
 - `search`：统一查询入口（glob 路径搜索 / regex 搜索 / literal 子串搜索）
 - `read_text`：统一单文件/批量读取入口，支持按行分页（`start_line`/`line_limit`）和 `language` 提示
-- `replace_in_file`：替换一个精确片段，或替换全部精确匹配，支持 `dry_run`
 - `write_file`：整文件写入，支持 `dry_run`
-- `apply_patch`：应用 codex 风格的 add / update / move / delete patch，支持 `dry_run`、`validate_only` 和可选 diff 输出
+- `apply_patch`：现有文件的默认编辑工具；支持 codex 风格 add / update / move / delete patch，以及 `dry_run`、`validate_only` 和可选 diff 输出
 - `server_info`：查看运行时配置与已注册工具清单
 - `set_default_cwd`：设置会话级默认工作目录
 - `get_default_cwd`：查看当前会话/生效工作目录
