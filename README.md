@@ -189,6 +189,7 @@ NOTION_LOCAL_OPS_CLAUDE_COMMAND="claude"
 NOTION_LOCAL_OPS_COMMAND_TIMEOUT="120"
 NOTION_LOCAL_OPS_DELEGATE_TIMEOUT="1800"
 NOTION_LOCAL_OPS_GRACEFUL_SHUTDOWN_SECONDS="30"
+NOTION_LOCAL_OPS_LAUNCHD_LABEL_PREFIX="com.notion-local-ops"
 ```
 
 ### Manual Start
@@ -241,6 +242,36 @@ Once `./scripts/dev-tunnel.sh` is already running in one terminal or tmux pane, 
 
 This keeps `cloudflared` attached to the same local port while the supervisor starts a fresh MCP server process, waits for readiness, and then drains the old one. It is the recommended way to pick up code changes without causing transient 502 responses to Notion.
 
+### Persistent macOS launchd install
+
+Use this when the MCP server should stay up even if your shell or tmux pane dies:
+
+```bash
+./scripts/install-launchd.sh
+```
+
+What gets installed:
+
+- one LaunchAgent for the local MCP supervisor
+- one LaunchAgent for `cloudflared tunnel run`
+- automatic restart via `launchd` `KeepAlive` when either process exits
+
+Useful commands after install:
+
+```bash
+./scripts/launchd-status.sh
+./scripts/launchd-reload.sh           # code-only rolling reload via HUP
+./scripts/launchd-restart.sh mcp      # full MCP restart after dependency/env changes
+./scripts/launchd-restart.sh all      # restart MCP + cloudflared
+./scripts/uninstall-launchd.sh
+```
+
+Update workflow:
+
+- Python/code-only changes: `./scripts/launchd-reload.sh`
+- dependency / `.venv` / env changes: `./scripts/launchd-restart.sh mcp`
+- tunnel config changes: `./scripts/launchd-restart.sh cloudflared`
+
 ### Expose With cloudflared
 
 #### Quick tunnel
@@ -283,6 +314,7 @@ cloudflared tunnel --config ./cloudflared-example.yml run <your-tunnel-name>
 | `NOTION_LOCAL_OPS_DELEGATE_TIMEOUT` | no | `1800` |
 | `NOTION_LOCAL_OPS_DEBUG_MCP_LOGGING` | no | `0` |
 | `NOTION_LOCAL_OPS_GRACEFUL_SHUTDOWN_SECONDS` | no | `30` |
+| `NOTION_LOCAL_OPS_LAUNCHD_LABEL_PREFIX` | no | `com.notion-local-ops` |
 
 ## MCP Tools
 
@@ -351,7 +383,8 @@ pytest -q tests/test_server_transport.py tests/test_concurrent_clients.py tests/
 - Check the auth type is `Bearer`
 - Check the token matches `NOTION_LOCAL_OPS_AUTH_TOKEN`
 - Check `cloudflared` is still running
-- If you are updating the server while users are connected, prefer `./scripts/dev-tunnel.sh reload` over killing and restarting the whole tunnel session
+- If you installed the macOS LaunchAgents, start with `./scripts/launchd-status.sh`
+- If you are updating the server while users are connected, prefer `./scripts/dev-tunnel.sh reload` or `./scripts/launchd-reload.sh` over killing the whole tunnel session
 
 ### MCP endpoint works locally but not over tunnel
 
